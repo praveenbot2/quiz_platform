@@ -36,3 +36,8 @@ def create_quiz(request):
         quiz = Quiz.objects.create(title=title, category=category)
         return JsonResponse({"message": "Quiz created successfully"})
     return render(request, "create_quiz.html")
+
+
+def portfolio(request):
+    """Portfolio page showcasing developer information and projects"""
+    return render(request, "quiz/portfolio.html")
