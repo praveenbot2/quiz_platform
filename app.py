@@ -49,18 +49,39 @@ def create_patient():
     try:
         data = request.json
         
+        # Validate required fields
+        required_fields = ['name', 'age', 'gender', 'email']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        if missing_fields:
+            return jsonify({
+                'error': f'Missing required fields: {", ".join(missing_fields)}'
+            }), 400
+        
+        # Validate age
+        try:
+            age = int(data.get('age'))
+            if age < 0 or age > 150:
+                return jsonify({'error': 'Age must be between 0 and 150'}), 400
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Invalid age value'}), 400
+        
+        # Validate email format (basic check)
+        email = data.get('email', '').strip()
+        if '@' not in email:
+            return jsonify({'error': 'Invalid email format'}), 400
+        
         # Check if email already exists
-        existing_patient = Patient.query.filter_by(email=data.get('email')).first()
+        existing_patient = Patient.query.filter_by(email=email).first()
         if existing_patient:
             return jsonify({'error': 'Patient with this email already exists'}), 400
         
         patient = Patient(
-            name=data.get('name'),
-            age=data.get('age'),
-            gender=data.get('gender'),
+            name=data.get('name').strip(),
+            age=age,
+            gender=data.get('gender').strip(),
             blood_group=data.get('blood_group'),
             phone=data.get('phone'),
-            email=data.get('email'),
+            email=email,
             address=data.get('address'),
             medical_history=data.get('medical_history')
         )
@@ -109,7 +130,21 @@ def submit_health_data():
     """Submit health data for a patient"""
     try:
         data = request.json
+        
+        # Validate patient_id is provided
         patient_id = data.get('patient_id')
+        if not patient_id:
+            return jsonify({'error': 'patient_id is required'}), 400
+        
+        # Validate at least some health data is provided
+        vital_fields = ['heart_rate', 'blood_pressure_systolic', 'blood_pressure_diastolic', 
+                       'temperature', 'oxygen_saturation', 'respiratory_rate']
+        has_vitals = any(data.get(field) is not None for field in vital_fields)
+        
+        if not has_vitals and not data.get('symptoms'):
+            return jsonify({
+                'error': 'At least one vital sign or symptom must be provided'
+            }), 400
         
         # Verify patient exists
         patient = Patient.query.get(patient_id)
@@ -174,12 +209,25 @@ def predict_health_risk():
     """Predict health risk based on patient data"""
     try:
         data = request.json
+        
+        # Validate patient_id
         patient_id = data.get('patient_id')
+        if not patient_id:
+            return jsonify({'error': 'patient_id is required'}), 400
         
         # Verify patient exists
         patient = Patient.query.get(patient_id)
         if not patient:
             return jsonify({'error': 'Patient not found'}), 404
+        
+        # Validate required vital signs for prediction
+        required_vitals = ['heart_rate', 'blood_pressure_systolic', 'blood_pressure_diastolic', 
+                          'temperature', 'oxygen_saturation']
+        missing_vitals = [v for v in required_vitals if data.get(v) is None]
+        if missing_vitals:
+            return jsonify({
+                'error': f'Missing required vital signs: {", ".join(missing_vitals)}'
+            }), 400
         
         # Prepare patient data for prediction
         patient_data = {
