@@ -5,12 +5,17 @@ from models.health_risk_model import HealthRiskModel
 from models.disease_prediction_model import DiseasePredictionModel
 from models.vitals_anomaly_model import VitalsAnomalyModel
 import json
+import os
 from datetime import datetime
+from config import config
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///health_monitoring.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-CORS(app)
+
+# Load configuration based on environment
+env = os.environ.get('FLASK_ENV', 'development')
+app.config.from_object(config[env])
+
+CORS(app, origins=app.config['CORS_ORIGINS'])
 
 # Initialize database
 db.init_app(app)
@@ -349,5 +354,14 @@ if __name__ == '__main__':
         print("Database tables created successfully")
     
     print("Starting AI Health Monitoring System...")
-    print("Server running at http://localhost:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    print(f"Server running at http://{app.config['HOST']}:{app.config['PORT']}")
+    print(f"Environment: {os.environ.get('FLASK_ENV', 'development')}")
+    
+    if app.config['DEBUG']:
+        print("⚠️  WARNING: Running in DEBUG mode. Disable for production!")
+    
+    app.run(
+        debug=app.config['DEBUG'],
+        host=app.config['HOST'],
+        port=app.config['PORT']
+    )

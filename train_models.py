@@ -6,6 +6,16 @@ from models.disease_prediction_model import DiseasePredictionModel
 from models.vitals_anomaly_model import VitalsAnomalyModel
 
 def main():
+    """
+    Main function to train all machine learning models for the health monitoring system.
+    
+    This function trains three models:
+    1. Health Risk Prediction Model - Predicts patient health risk levels
+    2. Disease Prediction Model - Predicts diseases based on symptoms
+    3. Vitals Anomaly Detection Model - Detects abnormal vital signs
+    
+    All models are saved to the 'models/' directory for later use by the application.
+    """
     print("=" * 60)
     print("AI Health Monitoring System - Model Training")
     print("=" * 60)

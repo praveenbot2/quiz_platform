@@ -38,12 +38,18 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Initialize the database:
+4. Configure environment (optional):
+```bash
+cp .env.example .env
+# Edit .env with your settings
+```
+
+5. Initialize the database:
 ```bash
 python init_db.py
 ```
 
-5. Train the ML models:
+6. Train the ML models:
 ```bash
 python train_models.py
 ```
@@ -128,6 +134,15 @@ quiz_platform/
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Security Considerations
+
+- **Not for Production Medical Use**: This is a demonstration system. Do not use for actual medical diagnosis.
+- **Data Privacy**: Ensure patient data is properly secured and encrypted in production environments.
+- **Access Control**: Implement proper authentication and authorization before deploying.
+- **Environment Variables**: Use `.env` file for sensitive configuration (never commit `.env` to version control).
+- **HTTPS**: Always use HTTPS in production to protect data in transit.
+- **Input Validation**: All user inputs are validated, but additional security measures should be implemented for production.
 
 ## License
 
